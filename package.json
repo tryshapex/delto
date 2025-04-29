@@ -1,0 +1,49 @@
+{
+  "name": "delto",
+  "version": "0.0.1",
+  "description": "An event-driven backend web framework.",
+  "author": "Asko Nõmm <asko@nmm.ee> (https://nmm.ee)",
+  "main": "dist/delto.cjs",
+  "module": "dist/delto.js",
+  "types": "dist/delto.d.ts",
+  "exports": {
+    "import": {
+      "types": "./dist/delto.d.ts",
+      "default": "./dist/delto.js"
+    },
+    "require": {
+      "types": "./dist/delto.d.cts",
+      "default": "./dist/delto.cjs"
+    }
+  },
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "framework",
+    "pubsub",
+    "events",
+    "web"
+  ],
+  "bugs": {
+    "url": "https://github.com/shapex/delto/issues",
+    "email": "asko@nmm.ee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shapex/delto.git"
+  },
+  "scripts": {
+    "bundle": "tsup src/delto.ts",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.10",
+    "@vitest/coverage-v8": "^2.1.8",
+    "@vitest/ui": "^2.1.8",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}
