@@ -25,12 +25,12 @@
     "web"
   ],
   "bugs": {
-    "url": "https://github.com/shapex/delto/issues",
+    "url": "https://github.com/tryshapex/delto/issues",
     "email": "asko@nmm.ee"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shapex/delto.git"
+    "url": "git+https://github.com/tryshapex/delto.git"
   },
   "scripts": {
     "bundle": "tsup src/delto.ts",
