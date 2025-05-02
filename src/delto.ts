@@ -9,6 +9,7 @@ export type DeltoRoute = Route & {
 export type DeltoRequest = {
   url: URL;
   method: string;
+  body?: Buffer;
 };
 
 export type DeltoResponse = {
@@ -122,8 +123,8 @@ export default function Delto<T extends DeltoState>(
         ...state,
         http: {
           request: {
-            ...req,
             url: new URL(req.url ?? "", `http://${req.headers.host}`),
+            method: req.method,
           },
         },
       },
