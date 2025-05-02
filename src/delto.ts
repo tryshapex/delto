@@ -87,16 +87,13 @@ export default function Delto<T extends DeltoState>(
     };
   });
 
-  $.subscribe("set-http.request.body", (state, body?: Buffer) => {
+  $.subscribe("set-http.request", (state, request?: DeltoRequest) => {
     return {
       state: {
         ...state,
         http: {
           ...state.http,
-          request: {
-            ...state.http?.request,
-            body,
-          },
+          request,
         },
       },
     };
@@ -115,20 +112,12 @@ export default function Delto<T extends DeltoState>(
     });
 
     req.on("end", () => {
-      $.dispatch("set-http.request.body", Buffer.concat(bodyChunks));
+      $.dispatch("set-http.request", {
+        url: new URL(`http://${req.headers.host}${req.url}`),
+        method: req.method,
+        body: Buffer.concat(bodyChunks),
+      });
     });
-
-    return {
-      state: {
-        ...state,
-        http: {
-          request: {
-            url: new URL(req.url ?? "", `http://${req.headers.host}`),
-            method: req.method,
-          },
-        },
-      },
-    };
   });
 
   $.subscribe("http.response.plain", (state, data?: DeltoResponse) => {
