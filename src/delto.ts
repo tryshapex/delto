@@ -55,6 +55,7 @@ export default function Delto<T extends DeltoState>(
 ): DeltoInstance<T> {
   const $ = ShapeX<T>(state);
   const routes = [] as DeltoRoute[];
+  let _res: ServerResponse | undefined;
 
   $.subscribe("$.http.request", (state) => {
     // No HTTP state, nothing to do
@@ -156,6 +157,25 @@ export default function Delto<T extends DeltoState>(
     };
   });
 
+  $.subscribe("$.http.response", (state) => {
+    const response = state.http?.response;
+
+    // If a response is set, return it
+    if (response) {
+      _res?.writeHead(response.status ?? 200, response.headers);
+      _res?.end(response.body);
+
+      return;
+    }
+
+    // Otherwise, return a 404 response
+    _res?.writeHead(404, {
+      "Content-Type": "text/plain",
+    });
+
+    _res?.end("Not found.");
+  });
+
   // Create get routes
   const _get = (path: string, dispatch: string) => {
     routes.push({
@@ -234,23 +254,7 @@ export default function Delto<T extends DeltoState>(
     const server = http.createServer(
       (req: IncomingMessage, res: ServerResponse) => {
         $.dispatch("http.request", req);
-
-        const response = $.state().http?.response;
-
-        // If a response is set, return it
-        if (response) {
-          res.writeHead(response.status ?? 200, response.headers);
-          res.end(response.body);
-
-          return;
-        }
-
-        // Otherwise, return a 404 response
-        res.writeHead(404, {
-          "Content-Type": "text/plain",
-        });
-
-        res.end("Not found.");
+        _res = res;
       },
     );
 
