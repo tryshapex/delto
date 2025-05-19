@@ -181,3 +181,40 @@ app.subscribe("my-event", (state) => {
   };
 });
 ```
+
+##### `http.response.html`
+
+Return an HTML response with the `http.response.html` event like so:
+
+```typescript
+app.subscribe("my-event", (state) => {
+  return {
+    dispatch: {
+      to: "http.response.html",
+      with: {
+        body: "<h1>Hello, World</h1>",
+      },
+    },
+  };
+});
+```
+
+##### `http.response`
+
+Return a custom response with the `http.response` event like so:
+
+```typescript
+app.subscribe("my-event", (state) => {
+  return {
+    dispatch: {
+      to: "http.response",
+      with: {
+        status: 302,
+        headers: {
+          Location: "/hello/world",
+        },
+      },
+    },
+  };
+});
+```

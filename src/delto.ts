@@ -50,9 +50,7 @@ export type DeltoInstance<T extends DeltoState> = ShapeXInstance<T> & {
 /**
  * Creates a Rose instance with the given runtime platform.
  */
-export default function Delto<T extends DeltoState>(
-  state: T,
-): DeltoInstance<T> {
+export default function Delto<T extends DeltoState>(state: T): DeltoInstance<T> {
   const $ = ShapeX<T>(state);
   const routes = [] as DeltoRoute[];
   let _res: ServerResponse | undefined;
@@ -121,6 +119,24 @@ export default function Delto<T extends DeltoState>(
     });
   });
 
+  $.subscribe("http.response.html", (state, data?: DeltoResponse) => {
+    return {
+      state: {
+        ...state,
+        http: {
+          ...state.http,
+          response: {
+            body: data?.body ?? "",
+            status: data?.status ?? 200,
+            headers: {
+              "Content-Type": "text/html",
+            },
+          },
+        },
+      },
+    };
+  });
+
   $.subscribe("http.response.plain", (state, data?: DeltoResponse) => {
     return {
       state: {
@@ -152,6 +168,18 @@ export default function Delto<T extends DeltoState>(
               "Content-Type": "application/json",
             },
           },
+        },
+      },
+    };
+  });
+
+  $.subscribe("http.response", (state, data?: DeltoResponse) => {
+    return {
+      state: {
+        ...state,
+        http: {
+          ...state.http,
+          response: data ?? {},
         },
       },
     };
@@ -251,12 +279,10 @@ export default function Delto<T extends DeltoState>(
 
   // Start HTTP server
   const _serve = (opts?: DeltoOpts): void => {
-    const server = http.createServer(
-      (req: IncomingMessage, res: ServerResponse) => {
-        $.dispatch("http.request", req);
-        _res = res;
-      },
-    );
+    const server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
+      $.dispatch("http.request", req);
+      _res = res;
+    });
 
     server.listen(opts?.port ?? 3000, () => {
       console.log(`Listening on http://0.0.0.0:${opts?.port ?? 3000}`);
