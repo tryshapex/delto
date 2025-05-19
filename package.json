@@ -1,6 +1,6 @@
 {
   "name": "delto",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "An event-driven backend web framework.",
   "author": "Asko Nõmm <asko@nmm.ee> (https://nmm.ee)",
   "main": "dist/delto.cjs",
