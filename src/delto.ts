@@ -31,11 +31,18 @@ export type DeltoOpts = {
   port?: number;
 };
 
+export type DeltoMiddleware = <T extends DeltoState>(
+  state: T,
+  $: ShapeXInstance<T>,
+  next: () => void,
+) => void;
+
 /**
  * Rose instance with HTTP route methods and ShapeX instance methods.
  */
 export type DeltoInstance<T extends DeltoState> = ShapeXInstance<T> & {
   serve: (opts?: DeltoOpts) => void;
+  use: (middleware: DeltoMiddleware) => void;
   get: (path: string, dispatch: string) => void;
   post: (path: string, dispatch: string) => void;
   put: (path: string, dispatch: string) => void;
@@ -53,36 +60,52 @@ export type DeltoInstance<T extends DeltoState> = ShapeXInstance<T> & {
 export default function Delto<T extends DeltoState>(state: T): DeltoInstance<T> {
   const $ = ShapeX<T>(state);
   const routes = [] as DeltoRoute[];
+  const middlewares = [] as DeltoMiddleware[];
   let _res: ServerResponse | undefined;
 
   $.subscribe("$.http.request", (state) => {
     // No HTTP state, nothing to do
     if (!state.http) return;
 
+    // Find route
     const route = Router.route(
       routes,
       state.http?.request.url.pathname,
       state.http?.request.method,
     );
 
-    // No matching route found, set response to null
-    if (!route) {
-      return {
-        state,
-        http: {
-          ...state.http,
-          response: null,
-        },
-      };
-    }
+    // Run middlewares
+    const runMiddlewares = (index: number): void => {
+      // All middlewares completed, dispatch the route.
+      if (index >= middlewares.length) {
+        if (route) {
+          $.dispatch(route.dispatch, Router.params(route, state.http?.request.url.pathname ?? ""));
 
-    // Route found, dispatch the route
-    return {
-      state,
-      dispatch: {
-        to: route.dispatch,
-        with: Router.params(route, state.http?.request.url.pathname),
-      },
+          return;
+        }
+
+        $.dispatch("http.response", {
+          status: 404,
+          body: "Not found.",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+        });
+
+        return;
+      }
+
+      try {
+        middlewares[index](state, $, () => runMiddlewares(index + 1));
+      } catch (error) {
+        $.dispatch("http.response", {
+          status: 500,
+          body: "Something went wrong ...",
+          headers: {
+            "Content-Type": "text/plain",
+          },
+        });
+      }
     };
   });
 
@@ -277,6 +300,10 @@ export default function Delto<T extends DeltoState>(state: T): DeltoInstance<T> 
     });
   };
 
+  const _use = (middleware: DeltoMiddleware) => {
+    middlewares.push(middleware);
+  };
+
   // Start HTTP server
   const _serve = (opts?: DeltoOpts): void => {
     const server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
@@ -300,6 +327,7 @@ export default function Delto<T extends DeltoState>(state: T): DeltoInstance<T> 
     head: _head,
     trace: _trace,
     connect: _connect,
+    use: _use,
     ...$,
   };
 }
