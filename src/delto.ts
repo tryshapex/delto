@@ -107,6 +107,8 @@ export default function Delto<T extends DeltoState>(state: T): DeltoInstance<T> 
         });
       }
     };
+
+    runMiddlewares(0);
   });
 
   $.subscribe("set-http.request", (state, request?: DeltoRequest) => {
