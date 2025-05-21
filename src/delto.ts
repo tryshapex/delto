@@ -42,7 +42,7 @@ export type DeltoMiddleware = <T extends DeltoState>(
  */
 export type DeltoInstance<T extends DeltoState> = ShapeXInstance<T> & {
   serve: (opts?: DeltoOpts) => void;
-  use: (middleware: DeltoMiddleware) => void;
+  with: (middleware: DeltoMiddleware) => void;
   get: (path: string, dispatch: string) => void;
   post: (path: string, dispatch: string) => void;
   put: (path: string, dispatch: string) => void;
@@ -302,7 +302,7 @@ export default function Delto<T extends DeltoState>(state: T): DeltoInstance<T> 
     });
   };
 
-  const _use = (middleware: DeltoMiddleware) => {
+  const _with = (middleware: DeltoMiddleware) => {
     middlewares.push(middleware);
   };
 
@@ -329,7 +329,7 @@ export default function Delto<T extends DeltoState>(state: T): DeltoInstance<T> 
     head: _head,
     trace: _trace,
     connect: _connect,
-    use: _use,
+    with: _with,
     ...$,
   };
 }
